@@ -1,17 +1,6 @@
 version: 2.1
 
 commands:
-  install_ansible:
-    description: Install ansible
-    steps:
-      - run:
-          name: Install ansible
-          command: |
-            sudo apt update
-            sudo apt install software-properties-common -y
-            sudo -E add-apt-repository --yes --update ppa:ansible/ansibe
-            sudo apt install ansible -y
-
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -214,8 +203,19 @@ jobs:
       # Here's where you will add some code to rollback on failure      
 
   configure-infrastructure:
-    docker:
-      - image: cimg/base:stable
+     docker:
+       - image: python:3.7-alpine3.11
+         environment:
+           NODE_ENV: "local"
+           VERSION: "1"
+           ENVIRONMENT: "production"
+           TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+           TYPEORM_HOST: $TYPEORM_HOST
+           TYPEORM_USERNAME: $TYPEORM_USERNAME
+           TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+           TYPEORM_DATABASE: $TYPEORM_DATABASE
+           TYPEORM_PORT: $TYPEORM_PORT
+           TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
        - checkout
        # Add ssh keys with fingerprint
@@ -225,7 +225,6 @@ jobs:
        - attach_workspace:
            at: ~/
        
-       - install_ansible
 
        - run:
           name: Configure server
